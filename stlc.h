@@ -17,8 +17,8 @@ typedef long T;
 #define BODY(T) ((T) + 1)
 #define TYPE(T) (~(T))
 
-#define BINDER(T)   (term[(T)])
-#define BINDTYPE(T) (term[(T)])
+#define BINDER(T) (term[(T)])
+#define BIND(T)   (term[(T)])
 
 /* Types */
 

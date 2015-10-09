@@ -1,6 +1,6 @@
 #include "stlc.h"
 
-static T weigh1(T, T *, T *, T, T);
+static T weigh1(T, T *, T, T);
 
 /* Calculates the weight of a given lambda term, being the total number of
  * applications and abstractions in the term. If the object does not represent
@@ -11,28 +11,25 @@ static T weigh1(T, T *, T *, T, T);
 T
 weigh(T len, T *term)
 {
-	T scope[len];
-
-	return weigh1(len, term, scope, NIL, ROOT);
+	return weigh1(len, term, NIL, ROOT);
 }
 
 T
-weigh1(T max, T *term, T *scope, T parent, T t)
+weigh1(T max, T *term, T parent, T t)
 {
 	for (T weight = 0; t >= 0 && t < max; weight += 2) {
 		if (ISABS(t)) {
-			scope[t] = max;
+			BIND(t) = TYPE(max);
 			parent = t;
 			t = BODY(t);
 		}
 		else if (ISVAR(t)) {
-			if (t >= scope[BINDER(t)])
+			if (t >= TYPE(BIND(BINDER(t)))) // if binder is app then type is < 0
 				break; // var is outside the scope of its binder
 			return weight;
 		}
 		else {
-			scope[t] = NIL;
-			T w = weigh1(RIGHT(t), term, scope, t, LEFT(t));
+			T w = weigh1(RIGHT(t), term, t, LEFT(t));
 			if (w == NIL)
 				break;
 			weight += w;

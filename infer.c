@@ -29,7 +29,7 @@ infer1(T *term, T *type, T *fresh, T parent, T t)
 		T xa = *fresh; *fresh += 2;
 		T x = ATOM(xa);
 		VALUE(x) = NIL;
-		BINDTYPE(t) = TYPE(x);
+		BIND(t) = TYPE(x);
 		T a = infer1(term, type, fresh, t, BODY(t));
 		if (a == NIL)
 			return NIL;
@@ -38,7 +38,7 @@ infer1(T *term, T *type, T *fresh, T parent, T t)
 		return xa;
 	}
 	else if (ISVAR(t)) {
-		return TYPE(BINDTYPE(BINDER(t)));
+		return TYPE(BIND(BINDER(t)));
 	}
 	else {
 		T a = infer1(term, type, fresh, t, LEFT(t));

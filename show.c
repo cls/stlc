@@ -29,7 +29,7 @@ showterm1(T *term, T *type, T parent, T t)
 		printf("\\%ld", t);
 		if (type) {
 			putchar(':');
-			showtype1(type, false, TYPE(BINDTYPE(t)));
+			showtype1(type, false, TYPE(BIND(t)));
 		}
 		putchar('.');
 		putchar(' ');
