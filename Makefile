@@ -1,4 +1,4 @@
-CFLAGS  = -pedantic -std=c99 -Wall
+CFLAGS  = -g -pedantic -std=c99 -Wall
 LDFLAGS = -g
 
 SRC = infer.c main.c show.c weigh.c
@@ -15,4 +15,4 @@ stlc: $(OBJ)
 $(OBJ): stlc.h
 
 clean:
-	rm -f $(OBJ)
+	rm -f stlc $(OBJ)
