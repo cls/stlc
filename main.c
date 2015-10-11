@@ -12,7 +12,7 @@ main(int argc, char **argv)
 {
 	T meta[LEN(term)];
 
-	if (!valid(LEN(term), term, meta, ROOT)) {
+	if (!valid(LEN(term), term, meta)) {
 		puts("term not valid");
 		return 1;
 	}
@@ -20,7 +20,7 @@ main(int argc, char **argv)
 	showterm(term, NULL, ROOT);
 	putchar('\n');
 
-	if (!infer(term, meta, ROOT)) {
+	if (!infer(LEN(term), term, meta)) {
 		puts("term not well-typed");
 		return 1;
 	}

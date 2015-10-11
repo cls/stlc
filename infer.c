@@ -4,24 +4,19 @@ static bool unify(const T *, T *, T, T);
 static bool occurs(const T *, T *, T, T);
 
 /* Attempts to infer a simple typing for a term, and returns true if successful.
+ *   len:  The size of the term.
  *   term: A valid lambda term.
  *   type: An uninitialised array the same length as the term.
- *   t:    A subterm index.
  */
 bool
-infer(const T *term, T *type, T t)
+infer(long len, const T *term, T *type)
 {
-	while (!ISVAR(t)) {
-		INIT(ATOM(t));
+	for (T t = ROOT; t < len; t++)
+		type[t] = ATOM(t); // initialise atoms
 
-		if (ISAPP(t)) {
-			return infer(term, type, RIGHT(t))
-			    && infer(term, type, LEFT(t))
-			    && unify(term, type, TYPEOF(LEFT(t)), t);
-		}
-		else
-			t = BODY(t);
-	}
+	for (T t = ROOT; t < len; t++)
+		if (ISAPP(t) && !unify(term, type, TYPEOF(LEFT(t)), t))
+			return false;
 
 	return true;
 }

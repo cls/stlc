@@ -30,15 +30,14 @@ typedef long T;
 
 #define VALUE(A)    (type[~(A)])
 #define HASVALUE(A) (VALUE(A) != (A))
-#define INIT(A)     (VALUE(A) = (A))
 
 #define DOMAIN(T)   (ISABS(T) ? ATOM(T) : SUB(T))
 #define CODOMAIN(T) (ISABS(T) ? SUB(T) : ATOM(T))
 
 /* Functions */
 
-bool infer(const T *, T *, T);
-bool valid(long, const T *, long *, T);
+bool infer(long, const T *, T *);
+bool valid(long, const T *, long *);
 void showterm(const T *, const T *, T);
 void showtype(const T *, const T *, T);
 

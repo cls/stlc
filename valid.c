@@ -4,29 +4,34 @@
  *   len:   The number of elements in the given array.
  *   term:  An array of length `len' to be checked for validity.
  *   scope: An uninitialised array of length `len'.
- *   t:     A subterm index.
  */
 bool
-valid(long len, const T *term, long *scope, T t)
+valid(long len, const T *term, long *scope)
 {
-	while (t < len) {
+	long max = len;
+
+	for (T t = ROOT; t < len; t++) {
 		if (ISVAR(t)) {
+			if (t < BINDER(t) || t >= scope[BINDER(t)])
+				return false; // illegal binder
+			if (t+1 != max)
+				return false; // dead code
 			scope[t] = 0;
-			return BINDER(t) < t && t < scope[BINDER(t)];
+			max = scope[t+1];
 		}
 		else if (ISAPP(t)) {
+			if (LEFT(t) >= len)
+				return false; // out of bounds
 			scope[t] = 0;
-			if (!valid(LEFT(t), term, scope, RIGHT(t)))
-				return false;
-			t = LEFT(t);
+			scope[LEFT(t)] = max;
+			max = LEFT(t);
 		}
 		else if (ISABS(t)) {
-			scope[t] = len;
-			t = BODY(t);
+			scope[t] = max;
 		}
 		else
 			return false;
 	}
 
-	return false; // fell out of bounds
+	return true;
 }
