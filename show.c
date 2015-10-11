@@ -2,69 +2,70 @@
 #include <stdbool.h>
 #include "stlc.h"
 
-static void showterm1(T *, T *, T, T);
-static void showtype1(T *, bool, T);
+static void showterm1(const term_t *, const type_t *, term_t);
+static void showtype1(const term_t *, const type_t *, type_t);
 
 void
-showterm(T *term, T *type)
+showterm(const term_t *term, const type_t *type)
 {
-	showterm1(term, type, NIL, ROOT);
+	showterm1(term, type, ROOT);
+
+	if (type) {
+		putchar(' ');
+		putchar(':');
+		putchar(' ');
+		showtype1(term, type, TYPEOF(ROOT));
+	}
+
 	putchar('\n');
 }
 
 void
-showtype(T *type, T a)
+showterm1(const term_t *term, const type_t *type, term_t t)
 {
-	showtype1(type, false, a);
-	putchar('\n');
-}
+	bool bracket = true;
 
-void
-showterm1(T *term, T *type, T parent, T t)
-{
-	if (ISABS(t)) {
-		bool bracket = parent != NIL && !ISABS(parent);
-
+	if (ISVAR(t)) {
+		printf("%ld", BINDER(t));
+	}
+	else if (ISABS(t)) {
 		if (bracket) putchar('(');
 		printf("\\%ld", t);
 		if (type) {
 			putchar(':');
-			showtype1(type, false, TYPE(BIND(t)));
+			showtype1(term, type, ATOM(t));
 		}
 		putchar('.');
 		putchar(' ');
-		showterm1(term, type, t, BODY(t));
+		showterm1(term, type, BODY(t));
 		if (bracket) putchar(')');
 	}
-	else if (ISVAR(t)) {
-		printf("%ld", BINDER(t));
-	}
 	else {
-		bool bracket = parent != NIL && !ISABS(parent) && t == RIGHT(parent);
-
 		if (bracket) putchar('(');
-		showterm1(term, type, t, LEFT(t));
+		showterm1(term, type, LEFT(t));
 		putchar(' ');
-		showterm1(term, type, t, RIGHT(t));
+		showterm1(term, type, RIGHT(t));
 		if (bracket) putchar(')');
 	}
 }
 
 void
-showtype1(T *type, bool bracket, T a)
+showtype1(const term_t *term, const type_t *type, type_t x)
 {
-	while (ISATOM(a) && VALUE(a) != NIL)
-		a = VALUE(a);
+	bool bracket = true;
 
-	if (ISATOM(a)) {
-		printf("%ld", a / 2);
+	while (ISATOM(x) && HASVALUE(x))
+		x = VALUE(x);
+
+	if (ISATOM(x)) {
+		printf("%ld", ~x);
 	}
 	else {
 		if (bracket) putchar('(');
-		showtype1(type, true, DOM(a));
+		showtype1(term, type, DOMAIN(x));
 		putchar('-');
 		putchar('>');
-		showtype1(type, false, COD(a));
+		showtype1(term, type, CODOMAIN(x));
 		if (bracket) putchar(')');
 	}
 }

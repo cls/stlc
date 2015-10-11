@@ -3,35 +3,29 @@
 
 #define LEN(X) (sizeof (X) / sizeof *(X))
 
-//static T term[] = { -1, 0 };
-//static T term[] = { -1, 3, 0, 0 };
-static T term[] = { -1, -1, 4, 0, 1 };
+//static term_t term[] = { 0, 0 };
+//static term_t term[] = { 0, 3, 0, 0 };
+static term_t term[] = { 0, 1, 4, 1, 0 };
 
 int
 main(int argc, char **argv)
 {
-	T weight = weigh(LEN(term), term);
+	type_t meta[LEN(term)];
 
-	if (weight == NIL) {
+	if (!valid(LEN(term), term, meta)) {
 		puts("term not valid");
 		return 1;
 	}
 
 	showterm(term, NULL);
 
-	T types[weight];
-
-	T type = infer(term, types);
-
-	if (type == NIL) {
+	if (!infer(term, meta)) {
 		puts("term not well-typed");
 		return 1;
 	}
 
 	puts("=");
-	showterm(term, types);
-	puts(":");
-	showtype(types, type);
+	showterm(term, meta);
 
 	return 0;
 }

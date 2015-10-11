@@ -1,41 +1,47 @@
 #ifndef STLC_H
 #define STLC_H
 
-typedef long T;
+#include <stdbool.h>
+
+typedef unsigned long term_t;
+typedef long type_t;
 
 #define ROOT 0
-#define NIL  (-1)
 
 /* Terms */
 
-#define ISABS(T) (term[(T)] < 0)
-#define ISVAR(T) (term[(T)] <= parent)
+#define ISVAR(T) (term[(T)] < (T))
+#define ISABS(T) (term[(T)] == (T))
+#define ISAPP(T) (term[(T)] > (T))
 
-#define LEFT(T)  ((T) + 1)
-#define RIGHT(T) (term[(T)])
+#define LEFT(T)  (term[(T)])
+#define RIGHT(T) ((T) + 1)
+#define BODY(T)  ((T) + 1)
 
-#define BODY(T) ((T) + 1)
-#define TYPE(T) (~(T))
-
-#define BINDER(T) (term[(T)])
-#define BIND(T)   (term[(T)])
+#define BINDER(T)  (term[(T)])
+#define VARTYPE(T) (ATOM(BINDER(T)))
 
 /* Types */
 
-#define ISATOM(A) ((A) % 2)
-#define VALUE(A)  (type[(A)])
+#define ISATOM(X)   ((X) <  0)
+#define ISFUNC(X)   ((X) >= 0)
 
-#define SUB(A)  (type[(A)] < 0 ? ~type[(A)] : type[(A)])
-#define ATOM(A) ((A) + 1)
+#define TYPEOF(T)   (ISVAR(T) ? VARTYPE(T) : ISABS(T) ? (T) : ATOM(T))
 
-#define DOM(A) (type[(A)] < 0 ? ~type[(A)] : ATOM(A))
-#define COD(A) (type[(A)] >= 0 ? type[(A)] : ATOM(A))
+#define ATOM(T)     (~(T))
+#define SUB(T)      (TYPEOF((T) + 1)) // RIGHT or BODY
+
+#define VALUE(A)    (type[ATOM(A)])
+#define HASVALUE(A) (VALUE(A) != (A))
+#define INIT(A)     (VALUE(A) = A)
+
+#define DOMAIN(T)   (ISABS(T) ? ATOM(T) : SUB(T))
+#define CODOMAIN(T) (ISABS(T) ? SUB(T) : ATOM(T))
 
 /* Functions */
 
-T infer(T *, T *);
-T weigh(T, T *);
-void showterm(T *, T *);
-void showtype(T *, T);
+bool infer(const term_t *, type_t *);
+bool valid(long, const term_t *, long *);
+void showterm(const term_t *, const type_t *);
 
 #endif

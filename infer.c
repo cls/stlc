@@ -1,113 +1,93 @@
-#include <stdbool.h>
 #include "stlc.h"
 
-#define FROM_ATOM_TO(A) (A)
-#define TO_ATOM_FROM(A) (~(A))
+static type_t infer1(bool *, const term_t *, type_t *, term_t);
+static bool unify(const term_t *, type_t *, type_t, type_t);
+static bool occurs(const term_t *, type_t *, type_t, type_t);
 
-static T infer1(T *, T *, T *, T, T);
-static bool unify(T *, T, T);
-static bool occurs(T *, T, T);
-
-/* Infers the simple type of a given lambda term, or if the term has no simple
- * type then NIL is returned instead.
- *   term: A valid lambda term, such that its weight is not NIL.
- *   type: A array of T's, its length being at least the weight of the term.
- * The contents of `type' need not be initialised.
+/* Attempts to infer a simple typing for a term, and returns true if successful.
+ *   term: A valid lambda term.
+ *   type: An uninitialised array the same length as the term.
  */
-T
-infer(T *term, T *type)
+bool
+infer(const term_t *term, type_t *type)
 {
-	T fresh = 0;
+	bool ok = true;
 
-	return infer1(term, type, &fresh, NIL, ROOT);
+	infer1(&ok, term, type, ROOT);
+	return ok;
 }
 
-T
-infer1(T *term, T *type, T *fresh, T parent, T t)
+type_t
+infer1(bool *ok, const term_t *term, type_t *type, term_t t)
 {
-	if (ISABS(t)) {
-		T xa = *fresh; *fresh += 2;
-		T x = ATOM(xa);
-		VALUE(x) = NIL;
-		BIND(t) = TYPE(x);
-		T a = infer1(term, type, fresh, t, BODY(t));
-		if (a == NIL)
-			return NIL;
-
-		type[xa] = FROM_ATOM_TO(a);
-		return xa;
+	if (ISVAR(t)) {
+		return VARTYPE(t);
 	}
-	else if (ISVAR(t)) {
-		return TYPE(BIND(BINDER(t)));
+	else if (ISABS(t)) {
+		INIT(ATOM(t));
+		infer1(ok, term, type, BODY(t));
+		return t;
 	}
 	else {
-		T a = infer1(term, type, fresh, t, LEFT(t));
-		if (a == NIL)
-			return NIL;
-
-		T b = infer1(term, type, fresh, t, RIGHT(t));
-		if (b == NIL)
-			return NIL;
-
-		T bx = *fresh; *fresh += 2;
-		T x = ATOM(bx);
-		VALUE(x) = NIL;
-		type[bx] = TO_ATOM_FROM(b);
-		if (!unify(type, a, bx))
-			return NIL;
-
-		return x;
+		type_t x = infer1(ok, term, type, LEFT(t));
+		infer1(ok, term, type, RIGHT(t));
+		type_t a = ATOM(t);
+		INIT(a);
+		if (!unify(term, type, x, t))
+			*ok = false;
+		return a;
 	}
 }
 
 bool
-unify(T *type, T a, T b)
+unify(const term_t *term, type_t *type, type_t x, type_t y)
 {
-	while (ISATOM(a) && VALUE(a) != NIL)
-		a = VALUE(a);
-	while (ISATOM(b) && VALUE(b) != NIL)
-		b = VALUE(b);
+	while (ISATOM(x) && HASVALUE(x))
+		x = VALUE(x);
+	while (ISATOM(y) && HASVALUE(y))
+		y = VALUE(y);
 
-	if (a == b)
+	if (x == y) {
 		return true;
-
-	if (ISATOM(a)) {
-		if (occurs(type, a, b))
-			return false;
-		VALUE(a) = b;
 	}
-	else if (ISATOM(b)) {
-		if (occurs(type, b, a))
+	else if (ISATOM(x)) {
+		if (occurs(term, type, x, y))
 			return false;
-		VALUE(b) = a;
+		VALUE(x) = y;
+		return true;
+	}
+	else if (ISATOM(y)) {
+		if (occurs(term, type, y, x))
+			return false;
+		VALUE(y) = x;
+		return true;
 	}
 	else {
-		if (!unify(type, DOM(a), DOM(b)) || !unify(type, COD(a), COD(b)))
-			return false;
+		return unify(term, type, DOMAIN(x),   DOMAIN(y))
+		    && unify(term, type, CODOMAIN(x), CODOMAIN(y));
 	}
-
-	return true;
 }
 
 bool
-occurs(T *type, T a, T b)
+occurs(const term_t *term, type_t *type, type_t a, type_t x)
 {
-	while (a != b) {
-		if (ISATOM(b)) {
+	while (a != x) {
+		if (ISATOM(x)) {
 			return false;
 		}
 		else {
-			T c = ATOM(b);
+			type_t b = ATOM(x);
 
-			if (VALUE(c) != NIL) {
+			if (HASVALUE(b)) {
 				do {
-					c = VALUE(c);
-				} while (ISATOM(c) && VALUE(c) != NIL);
+					b = VALUE(b);
+				} while (ISATOM(b) && HASVALUE(b));
 
-				if (occurs(type, a, c))
+				if (occurs(term, type, a, b))
 					break;
 			}
-			b = SUB(b);
+
+			x = SUB(x);
 		}
 	}
 

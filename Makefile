@@ -1,7 +1,7 @@
-CFLAGS  = -g -pedantic -std=c99 -Wall
+CFLAGS  = -g -pedantic -std=c99 -Wall -Werror
 LDFLAGS = -g
 
-SRC = infer.c main.c show.c weigh.c
+SRC = infer.c main.c show.c valid.c
 OBJ = $(SRC:.c=.o)
 
 all: stlc
