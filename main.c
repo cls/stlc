@@ -12,20 +12,24 @@ main(int argc, char **argv)
 {
 	type_t meta[LEN(term)];
 
-	if (!valid(LEN(term), term, meta)) {
+	if (!valid(LEN(term), term, meta, ROOT)) {
 		puts("term not valid");
 		return 1;
 	}
 
-	showterm(term, NULL);
+	showterm(term, NULL, ROOT);
+	putchar('\n');
 
-	if (!infer(term, meta)) {
+	if (!infer(term, meta, ROOT)) {
 		puts("term not well-typed");
 		return 1;
 	}
 
-	puts("=");
-	showterm(term, meta);
+	showterm(term, meta, ROOT);
+	putchar('\n');
+
+	showtype(term, meta, TYPEOF(ROOT));
+	putchar('\n');
 
 	return 0;
 }

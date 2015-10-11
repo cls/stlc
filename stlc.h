@@ -40,8 +40,9 @@ typedef long type_t;
 
 /* Functions */
 
-bool infer(const term_t *, type_t *);
-bool valid(long, const term_t *, long *);
-void showterm(const term_t *, const type_t *);
+bool infer(const term_t *, type_t *, term_t);
+bool valid(long, const term_t *, long *, term_t);
+void showterm(const term_t *, const type_t *, term_t);
+void showtype(const term_t *, const type_t *, type_t);
 
 #endif

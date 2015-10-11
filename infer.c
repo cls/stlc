@@ -1,42 +1,29 @@
 #include "stlc.h"
 
-static type_t infer1(bool *, const term_t *, type_t *, term_t);
 static bool unify(const term_t *, type_t *, type_t, type_t);
 static bool occurs(const term_t *, type_t *, type_t, type_t);
 
 /* Attempts to infer a simple typing for a term, and returns true if successful.
  *   term: A valid lambda term.
  *   type: An uninitialised array the same length as the term.
+ *   t:    A subterm index.
  */
 bool
-infer(const term_t *term, type_t *type)
+infer(const term_t *term, type_t *type, term_t t)
 {
-	bool ok = true;
-
-	infer1(&ok, term, type, ROOT);
-	return ok;
-}
-
-type_t
-infer1(bool *ok, const term_t *term, type_t *type, term_t t)
-{
-	if (ISVAR(t)) {
-		return VARTYPE(t);
-	}
-	else if (ISABS(t)) {
+	while (!ISVAR(t)) {
 		INIT(ATOM(t));
-		infer1(ok, term, type, BODY(t));
-		return t;
+
+		if (ISAPP(t)) {
+			return infer(term, type, RIGHT(t))
+			    && infer(term, type, LEFT(t))
+			    && unify(term, type, TYPEOF(LEFT(t)), t);
+		}
+		else
+			t = BODY(t);
 	}
-	else {
-		type_t x = infer1(ok, term, type, LEFT(t));
-		infer1(ok, term, type, RIGHT(t));
-		type_t a = ATOM(t);
-		INIT(a);
-		if (!unify(term, type, x, t))
-			*ok = false;
-		return a;
-	}
+
+	return true;
 }
 
 bool
