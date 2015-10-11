@@ -1,7 +1,7 @@
 #include "stlc.h"
 
-static bool unify(const term_t *, type_t *, type_t, type_t);
-static bool occurs(const term_t *, type_t *, type_t, type_t);
+static bool unify(const T *, T *, T, T);
+static bool occurs(const T *, T *, T, T);
 
 /* Attempts to infer a simple typing for a term, and returns true if successful.
  *   term: A valid lambda term.
@@ -9,7 +9,7 @@ static bool occurs(const term_t *, type_t *, type_t, type_t);
  *   t:    A subterm index.
  */
 bool
-infer(const term_t *term, type_t *type, term_t t)
+infer(const T *term, T *type, T t)
 {
 	while (!ISVAR(t)) {
 		INIT(ATOM(t));
@@ -27,7 +27,7 @@ infer(const term_t *term, type_t *type, term_t t)
 }
 
 bool
-unify(const term_t *term, type_t *type, type_t x, type_t y)
+unify(const T *term, T *type, T x, T y)
 {
 	while (ISATOM(x) && HASVALUE(x))
 		x = VALUE(x);
@@ -56,14 +56,14 @@ unify(const term_t *term, type_t *type, type_t x, type_t y)
 }
 
 bool
-occurs(const term_t *term, type_t *type, type_t a, type_t x)
+occurs(const T *term, T *type, T a, T x)
 {
 	while (a != x) {
 		if (ISATOM(x)) {
 			return false;
 		}
 		else {
-			type_t b = ATOM(x);
+			T b = ATOM(x);
 
 			if (HASVALUE(b)) {
 				do {

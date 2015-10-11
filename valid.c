@@ -7,12 +7,12 @@
  *   t:     A subterm index.
  */
 bool
-valid(long len, const term_t *term, long *scope, term_t t)
+valid(long len, const T *term, long *scope, T t)
 {
 	while (t < len) {
 		if (ISVAR(t)) {
 			scope[t] = 0;
-			return t < scope[BINDER(t)];
+			return BINDER(t) < t && t < scope[BINDER(t)];
 		}
 		else if (ISABS(t)) {
 			scope[t] = len;

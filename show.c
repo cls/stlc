@@ -2,7 +2,7 @@
 #include "stlc.h"
 
 void
-showterm(const term_t *term, const type_t *type, term_t t)
+showterm(const T *term, const T *type, T t)
 {
 	if (ISVAR(t)) {
 		printf("%ld", BINDER(t));
@@ -29,7 +29,7 @@ showterm(const term_t *term, const type_t *type, term_t t)
 }
 
 void
-showtype(const term_t *term, const type_t *type, type_t x)
+showtype(const T *term, const T *type, T x)
 {
 	while (ISATOM(x) && HASVALUE(x))
 		x = VALUE(x);

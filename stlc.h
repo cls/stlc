@@ -3,14 +3,13 @@
 
 #include <stdbool.h>
 
-typedef unsigned long term_t;
-typedef long type_t;
+typedef long T;
 
 #define ROOT 0
 
 /* Terms */
 
-#define ISVAR(T) (term[(T)] < (T))
+#define ISVAR(T) (term[(T)] < 0)
 #define ISABS(T) (term[(T)] == (T))
 #define ISAPP(T) (term[(T)] > (T))
 
@@ -18,15 +17,15 @@ typedef long type_t;
 #define RIGHT(T) ((T) + 1)
 #define BODY(T)  ((T) + 1)
 
-#define BINDER(T)  (term[(T)])
-#define VARTYPE(T) (ATOM(BINDER(T)))
+#define VARTYPE(T) (term[(T)])
+#define BINDER(T)  (ATOM(VARTYPE(T)))
 
 /* Types */
 
 #define ISATOM(X)   ((X) <  0)
 #define ISFUNC(X)   ((X) >= 0)
 
-#define TYPEOF(T)   (ISVAR(T) ? VARTYPE(T) : ISABS(T) ? (T) : ATOM(T))
+#define TYPEOF(T)   (ISAPP(T) ? ATOM(T) : term[(T)]) // abs: T, var: VARTYPE(T)
 
 #define ATOM(T)     (~(T))
 #define SUB(T)      (TYPEOF((T) + 1)) // RIGHT or BODY
@@ -40,9 +39,9 @@ typedef long type_t;
 
 /* Functions */
 
-bool infer(const term_t *, type_t *, term_t);
-bool valid(long, const term_t *, long *, term_t);
-void showterm(const term_t *, const type_t *, term_t);
-void showtype(const term_t *, const type_t *, type_t);
+bool infer(const T *, T *, T);
+bool valid(long, const T *, long *, T);
+void showterm(const T *, const T *, T);
+void showtype(const T *, const T *, T);
 
 #endif
