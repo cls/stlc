@@ -18,21 +18,19 @@ typedef long T;
 #define BODY(T)  ((T) + 1)
 
 #define VARTYPE(T) (term[(T)])
-#define BINDER(T)  (ATOM(VARTYPE(T)))
+#define BINDER(T)  (~(VARTYPE(T)))
 
 /* Types */
 
-#define ISATOM(X)   ((X) <  0)
-#define ISFUNC(X)   ((X) >= 0)
-
+#define ISATOM(X)   ((X) < 0)
 #define TYPEOF(T)   (ISAPP(T) ? ATOM(T) : term[(T)]) // abs: T, var: VARTYPE(T)
 
 #define ATOM(T)     (~(T))
 #define SUB(T)      (TYPEOF((T) + 1)) // RIGHT or BODY
 
-#define VALUE(A)    (type[ATOM(A)])
+#define VALUE(A)    (type[~(A)])
 #define HASVALUE(A) (VALUE(A) != (A))
-#define INIT(A)     (VALUE(A) = A)
+#define INIT(A)     (VALUE(A) = (A))
 
 #define DOMAIN(T)   (ISABS(T) ? ATOM(T) : SUB(T))
 #define CODOMAIN(T) (ISABS(T) ? SUB(T) : ATOM(T))

@@ -14,16 +14,18 @@ valid(long len, const T *term, long *scope, T t)
 			scope[t] = 0;
 			return BINDER(t) < t && t < scope[BINDER(t)];
 		}
+		else if (ISAPP(t)) {
+			scope[t] = 0;
+			if (!valid(LEFT(t), term, scope, RIGHT(t)))
+				return false;
+			t = LEFT(t);
+		}
 		else if (ISABS(t)) {
 			scope[t] = len;
 			t = BODY(t);
 		}
-		else {
-			scope[t] = 0;
-			if (!valid(LEFT(t), term, scope, RIGHT(t)))
-				break;
-			t = LEFT(t);
-		}
+		else
+			return false;
 	}
 
 	return false; // fell out of bounds

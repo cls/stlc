@@ -7,7 +7,14 @@ showterm(const T *term, const T *type, T t)
 	if (ISVAR(t)) {
 		printf("%ld", BINDER(t));
 	}
-	else if (ISABS(t)) {
+	else if (ISAPP(t)) {
+		putchar('(');
+		showterm(term, type, LEFT(t));
+		putchar(' ');
+		showterm(term, type, RIGHT(t));
+		putchar(')');
+	}
+	else {
 		putchar('(');
 		printf("\\%ld", t);
 		if (type) {
@@ -17,13 +24,6 @@ showterm(const T *term, const T *type, T t)
 		putchar('.');
 		putchar(' ');
 		showterm(term, type, BODY(t));
-		putchar(')');
-	}
-	else {
-		putchar('(');
-		showterm(term, type, LEFT(t));
-		putchar(' ');
-		showterm(term, type, RIGHT(t));
 		putchar(')');
 	}
 }
