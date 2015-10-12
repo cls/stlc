@@ -38,28 +38,34 @@ find(type_t *type, type_t x)
 bool
 unify(const term_t *term, type_t *type, type_t x, type_t y)
 {
-	x = find(type, x);
-	y = find(type, y);
+	for (;;) {
+		x = find(type, x);
+		y = find(type, y);
 
-	if (x == y) {
-		return true;
+		if (x == y) {
+			break;
+		}
+		else if (ISATOM(x)) {
+			if (occurs(term, type, x, y))
+				return false;
+			VALUE(x) = y;
+			break;
+		}
+		else if (ISATOM(y)) {
+			if (occurs(term, type, y, x))
+				return false;
+			VALUE(y) = x;
+			break;
+		}
+		else {
+			if (!unify(term, type, DOMAIN(x), DOMAIN(y)))
+				return false;
+			x = CODOMAIN(x);
+			y = CODOMAIN(y);
+		}
 	}
-	else if (ISATOM(x)) {
-		if (occurs(term, type, x, y))
-			return false;
-		VALUE(x) = y;
-		return true;
-	}
-	else if (ISATOM(y)) {
-		if (occurs(term, type, y, x))
-			return false;
-		VALUE(y) = x;
-		return true;
-	}
-	else {
-		return unify(term, type, DOMAIN(x),   DOMAIN(y))
-		    && unify(term, type, CODOMAIN(x), CODOMAIN(y));
-	}
+
+	return true;
 }
 
 bool
