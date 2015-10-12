@@ -1,7 +1,7 @@
 #include "stlc.h"
 
-static bool unify(const T *, T *, T, T);
-static bool occurs(const T *, T *, T, T);
+static bool unify(const term_t *, type_t *, type_t, type_t);
+static bool occurs(const term_t *, type_t *, type_t, type_t);
 
 /* Attempts to infer a simple typing for a term, and returns true if successful.
  *   len:  The size of the term.
@@ -9,12 +9,12 @@ static bool occurs(const T *, T *, T, T);
  *   type: An uninitialised array the same length as the term.
  */
 bool
-infer(long len, const T *term, T *type)
+infer(long len, const term_t *term, type_t *type)
 {
-	for (T t = ROOT; t < len; t++)
-		type[t] = ATOM(t); // initialise atoms
+	for (term_t t = ROOT; t < len; t++)
+		type[t] = ATOM(ISVAR(t) ? BINDER(t) : t); // initialise atoms
 
-	for (T t = ROOT; t < len; t++)
+	for (term_t t = ROOT; t < len; t++)
 		if (ISAPP(t) && !unify(term, type, TYPEOF(LEFT(t)), t))
 			return false;
 
@@ -22,7 +22,7 @@ infer(long len, const T *term, T *type)
 }
 
 bool
-unify(const T *term, T *type, T x, T y)
+unify(const term_t *term, type_t *type, type_t x, type_t y)
 {
 	while (ISATOM(x) && HASVALUE(x))
 		x = VALUE(x);
@@ -51,14 +51,14 @@ unify(const T *term, T *type, T x, T y)
 }
 
 bool
-occurs(const T *term, T *type, T a, T x)
+occurs(const term_t *term, type_t *type, type_t a, type_t x)
 {
 	while (a != x) {
 		if (ISATOM(x)) {
 			return false;
 		}
 		else {
-			T b = ATOM(x);
+			type_t b = ATOM(x);
 
 			if (HASVALUE(b)) {
 				do {

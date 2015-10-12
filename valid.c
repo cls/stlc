@@ -6,31 +6,29 @@
  *   scope: An uninitialised array of length `len'.
  */
 bool
-valid(long len, const T *term, long *scope)
+valid(long len, const term_t *term, long *scope)
 {
 	long max = len;
 
-	for (T t = ROOT; t < len; t++) {
-		if (ISVAR(t)) {
-			if (t < BINDER(t) || t >= scope[BINDER(t)])
-				return false; // illegal binder
-			if (t+1 != max)
-				return false; // dead code
-			scope[t] = 0;
-			max = scope[t+1];
+	for (term_t t = ROOT; t < len; t++) {
+		if (ISABS(t)) {
+			scope[t] = max;
 		}
 		else if (ISAPP(t)) {
-			if (LEFT(t) >= len)
+			if (LEFT(t) >= max)
 				return false; // out of bounds
 			scope[t] = 0;
 			scope[LEFT(t)] = max;
 			max = LEFT(t);
 		}
-		else if (ISABS(t)) {
-			scope[t] = max;
+		else {
+			if (t >= scope[BINDER(t)])
+				return false; // out of scope
+			if (t+1 != max)
+				return false; // dead code
+			scope[t] = 0;
+			max = scope[t+1];
 		}
-		else
-			return false;
 	}
 
 	return true;
