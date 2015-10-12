@@ -31,7 +31,7 @@ showterm(const term_t *term, const type_t *type, term_t t)
 void
 showtype(const term_t *term, const type_t *type, type_t x)
 {
-	while (ISATOM(x) && HASVALUE(x))
+	while (ISATOM(x) && VALUE(x) != NIL)
 		x = VALUE(x);
 
 	if (ISATOM(x)) {

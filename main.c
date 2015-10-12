@@ -3,16 +3,16 @@
 
 #define LEN(X) (sizeof (X) / sizeof *(X))
 
-//static term_t term[] = { 0, 0 };
-//static term_t term[] = { 0, 3, 0, 0 };
-static term_t term[] = { 0, 1, 4, 1, 0 };
+/*static term_t term[] = { 3, -1, -1 };*/
+/*static term_t term[] = { 5, 1, 4, -1, -1 };*/
+static term_t term[] = { 6, 1, 2, 5, -2, -1 };
 
 int
 main(int argc, char **argv)
 {
-	type_t meta[LEN(term)];
+	type_t *type;
 
-	if (!valid(LEN(term), term, meta)) {
+	if (!valid(LEN(term), term)) {
 		puts("term not valid");
 		return 1;
 	}
@@ -20,15 +20,17 @@ main(int argc, char **argv)
 	showterm(term, NULL, ROOT);
 	putchar('\n');
 
-	if (!infer(LEN(term), term, meta)) {
+	type = infer(term);
+
+	if (!type) {
 		puts("term not well-typed");
 		return 1;
 	}
 
-	showterm(term, meta, ROOT);
+	showterm(term, type, ROOT);
 	putchar('\n');
 
-	showtype(term, meta, TYPEOF(ROOT));
+	showtype(term, type, TYPEOF(ROOT));
 	putchar('\n');
 
 	return 0;

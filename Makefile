@@ -1,4 +1,4 @@
-CFLAGS  = -g -pedantic -std=c99 -Wall -Werror
+CFLAGS  = -g -ansi -pedantic -Wall -Werror
 LDFLAGS = -g
 
 SRC = infer.c main.c show.c valid.c

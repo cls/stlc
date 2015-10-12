@@ -1,32 +1,36 @@
+#include <stdlib.h>
 #include "stlc.h"
 
 static bool unify(const term_t *, type_t *, type_t, type_t);
 static bool occurs(const term_t *, type_t *, type_t, type_t);
 
-/* Attempts to infer a simple typing for a term, and returns true if successful.
- *   len:  The size of the term.
- *   term: A valid lambda term.
- *   type: An uninitialised array the same length as the term.
- */
-bool
-infer(long len, const term_t *term, type_t *type)
+/* Attempts to infer a simple typing for a term. */
+type_t *
+infer(const term_t *term)
 {
-	for (term_t t = ROOT; t < len; t++)
-		type[t] = ATOM(ISVAR(t) ? BINDER(t) : t); // initialise atoms
+	long len = term[0];
+	type_t *type;
+	term_t t;
 
-	for (term_t t = ROOT; t < len; t++)
-		if (ISAPP(t) && !unify(term, type, TYPEOF(LEFT(t)), t))
-			return false;
+	if (!(type = calloc(len, sizeof *type)))
+		return NULL;
 
-	return true;
+	for (t = ROOT; t < len; t++) {
+		if (ISAPP(t) && !unify(term, type, TYPEOF(LEFT(t)), t)) {
+			free(type);
+			return NULL;
+		}
+	}
+
+	return type;
 }
 
 bool
 unify(const term_t *term, type_t *type, type_t x, type_t y)
 {
-	while (ISATOM(x) && HASVALUE(x))
+	while (ISATOM(x) && VALUE(x) != NIL)
 		x = VALUE(x);
-	while (ISATOM(y) && HASVALUE(y))
+	while (ISATOM(y) && VALUE(x) != NIL)
 		y = VALUE(y);
 
 	if (x == y) {
@@ -60,10 +64,10 @@ occurs(const term_t *term, type_t *type, type_t a, type_t x)
 		else {
 			type_t b = ATOM(x);
 
-			if (HASVALUE(b)) {
+			if (VALUE(b) != NIL) {
 				do {
 					b = VALUE(b);
-				} while (ISATOM(b) && HASVALUE(b));
+				} while (ISATOM(b) && VALUE(b) != NIL);
 
 				if (occurs(term, type, a, b))
 					break;

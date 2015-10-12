@@ -1,37 +1,52 @@
+#include <stdlib.h>
 #include "stlc.h"
 
-/* Returns whether the given bounded array represents a valid lambda term.
- *   len:   The number of elements in the given array.
- *   term:  An array of length `len' to be checked for validity.
- *   scope: An uninitialised array of length `len'.
- */
+/* Returns whether the given bounded array represents a valid lambda term. */
 bool
-valid(long len, const term_t *term, long *scope)
+valid(long len, const term_t *term)
 {
-	long max = len;
+	long max;
+	long *scope;
+	term_t t;
 
-	for (term_t t = ROOT; t != max; t++) {
+	if (len < 2)
+		return false; /* no term present */
+	if (term[0] != len)
+		return false; /* wrong length */
+
+	if (!(scope = malloc(len * sizeof *scope)))
+		return false;
+
+	max = len;
+
+	for (t = ROOT; t != max; t++) {
 		if (ISABS(t)) {
 			scope[t] = max;
 		}
 		else if (ISAPP(t)) {
 			if (LEFT(t) >= max)
-				return false; // out of bounds
+				break; /* out of bounds */
 			scope[t] = 0;
 			scope[LEFT(t)] = max;
 			max = LEFT(t);
 		}
-		else {
+		else if (ISVAR(t)) {
 			if (t >= scope[BINDER(t)])
-				return false; // out of scope
+				break; /* out of scope */
 			if (t+1 != max)
-				return false; // dead code
-			if (max == len)
-				return true; // end of array
+				break; /* dead code */
+
+			if (max == len) {
+				free(scope);
+				return true; /* end of array */
+			}
 			scope[t] = 0;
 			max = scope[max];
 		}
+		else
+			break;
 	}
 
-	return false; // out of bounds
+	free(scope);
+	return false;
 }
