@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "stlc.h"
 
+static type_t find(type_t *, type_t);
 static bool unify(const term_t *, type_t *, type_t, type_t);
 static bool occurs(const term_t *, type_t *, type_t, type_t);
 
@@ -25,13 +26,20 @@ infer(const term_t *term)
 	return type;
 }
 
+type_t
+find(type_t *type, type_t x)
+{
+	if (ISATOM(x) && VALUE(x) != NIL)
+		return VALUE(x) = find(type, VALUE(x)); /* path compression */
+	else
+		return x;
+}
+
 bool
 unify(const term_t *term, type_t *type, type_t x, type_t y)
 {
-	while (ISATOM(x) && VALUE(x) != NIL)
-		x = VALUE(x);
-	while (ISATOM(y) && VALUE(x) != NIL)
-		y = VALUE(y);
+	x = find(type, x);
+	y = find(type, y);
 
 	if (x == y) {
 		return true;
@@ -57,25 +65,14 @@ unify(const term_t *term, type_t *type, type_t x, type_t y)
 bool
 occurs(const term_t *term, type_t *type, type_t a, type_t x)
 {
-	while (a != x) {
-		if (ISATOM(x)) {
+	for (;;) {
+		if (x == a)
+			return true;
+		else if (ISATOM(x))
 			return false;
-		}
-		else {
-			type_t b = ATOM(x);
-
-			if (VALUE(b) != NIL) {
-				do {
-					b = VALUE(b);
-				} while (ISATOM(b) && VALUE(b) != NIL);
-
-				if (occurs(term, type, a, b))
-					break;
-			}
-
+		else if (occurs(term, type, a, find(type, ATOM(x))))
+			return true;
+		else
 			x = SUB(x);
-		}
 	}
-
-	return true;
 }
