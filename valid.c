@@ -10,7 +10,7 @@ valid(long len, const term_t *term, long *scope)
 {
 	long max = len;
 
-	for (term_t t = ROOT; t < len; t++) {
+	for (term_t t = ROOT; t != max; t++) {
 		if (ISABS(t)) {
 			scope[t] = max;
 		}
@@ -26,10 +26,12 @@ valid(long len, const term_t *term, long *scope)
 				return false; // out of scope
 			if (t+1 != max)
 				return false; // dead code
+			if (max == len)
+				return true; // end of array
 			scope[t] = 0;
-			max = scope[t+1];
+			max = scope[max];
 		}
 	}
 
-	return true;
+	return false; // out of bounds
 }
