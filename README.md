@@ -1,7 +1,8 @@
 stlc
 ----
 
-This is an optimised type inference algorithm for the simply-typed λ-calculus.
+This is an optimised type inference algorithm for the simply-typed (or
+'monomorphic') λ-calculus.
 
 It is quite straightforward to write a naïve implementation of this algorithm,
 but having done so before in Haskell I was unhappy with the inefficiency of the
@@ -69,25 +70,25 @@ union-find algorithm, with path compression, to unify type atoms with each other
 and with the function types.
 
 Thus, for each application *t₁ = tₑt₂*, we must use type unification to unify
-*type(tₑ)* with *τ₁ = type(t₂) → α₁*. We can do this by seeking through the term
-array and attempting this unification at each application; no recursion over the
-term structure is required. If at any point this unification fails then the term
-must not be simply typed.
+*τ₁* with *type(tₑ)*. We can do this by seeking through the term array and
+attempting this unification at each application; no recursion over the term
+structure is required. If at any point this unification fails then the term must
+not be simply typed.
 
 ### Example
 
 The term *λx₁.λx₂.x₁x₂* is represented by the data sequence `6 1 2 5 -2 -1`. The
 components of this term are broken down as follows:
 
-1. *t₁ = λx₁.t₂*; *τ₁ = α₁ → τ₂*.
-2. *t₂ = λx₂.t₃*; *τ₂ = α₂ → α₃*.
-3. *t₃ = t₅t₄*; *τ₃ = α₂ → α₃*.
-4. *t₄ = x₂*.
-5. *t₅ = x₁*.
+1. *t₁ = λx₁.t₂ : τ₁*; *τ₁ = α₁ → type(t₂)*.
+2. *t₂ = λx₂.t₃ : τ₂*; *τ₂ = α₂ → type(t₃)*.
+3. *t₃ = t₅t₄ : α₃*; *τ₃ = type(t₄) → α₃*.
+4. *t₄ = x₂ : α₂*.
+5. *t₅ = x₁ : α₁*.
 
 However, at this stage the term is reckoned to have the type *α₁ → α₂ → α₃*,
 which is not correct. This is rectified once we make a pass over the term and,
-upon discovering the application at index 3, unify *α₁* with *τ₃*. The result is
-then, as expected, *(α₂ → α₃) → α₂ → α₃*. The data sequence of the atom array at
-the end of this is simply `0 3 0 0 0 0`, where the value 3 at index 1 indicates
-that the value of *α₁* has been set to *τ₃*.
+upon discovering the application at index 3, unify *τ₃* with *type(t₅)*. The
+result is then, as expected, *(α₂ → α₃) → α₂ → α₃*. The data sequence of the
+atom array at the end of this is simply `0 3 0 0 0 0`, where the value 3 at
+index 1 indicates that the value of *α₁* has been set to *τ₃*.
