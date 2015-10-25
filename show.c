@@ -39,10 +39,10 @@ showtype(const term_t *term, const type_t *type, type_t x)
 	}
 	else {
 		putchar('(');
-		showtype(term, type, DOMAIN(x));
+		showtype(term, type, DOM(x));
 		putchar('-');
 		putchar('>');
-		showtype(term, type, CODOMAIN(x));
+		showtype(term, type, COD(x));
 		putchar(')');
 	}
 }

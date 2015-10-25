@@ -23,16 +23,16 @@ typedef long type_t;
 
 /* Types */
 
-#define ISATOM(X)   ((X) < 0)
-#define TYPEOF(T)   (ISAPP(T) ? ATOM(T) : term[(T)]) /* T or ATOM(BINDER(T)) */
+#define ISATOM(X) ((X) < 0)
+#define TYPEOF(T) (ISAPP(T) ? ATOM(T) : term[(T)]) /* T or ATOM(BINDER(T)) */
 
-#define ATOM(T)     (-(T))
-#define SUB(T)      (TYPEOF((T) + 1)) /* RIGHT(T) or BODY(T) */
+#define ATOM(T)   (-(T))
+#define SUB(T)    (TYPEOF((T) + 1)) /* RIGHT(T) or BODY(T) */
 
-#define VALUE(A)    (type[-(A)])
+#define VALUE(A)  (type[-(A)])
 
-#define DOMAIN(T)   (ISABS(T) ? ATOM(T) : SUB(T))
-#define CODOMAIN(T) (ISABS(T) ? SUB(T) : ATOM(T))
+#define DOM(T)    (ISABS(T) ? ATOM(T) : SUB(T))
+#define COD(T)    (ISABS(T) ? SUB(T) : ATOM(T))
 
 /* Functions */
 
