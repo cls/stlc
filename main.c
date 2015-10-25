@@ -8,7 +8,7 @@
 static term_t term[] = { 6, 1, 2, 5, -2, -1 };
 
 int
-main(int argc, char **argv)
+main(void)
 {
 	type_t *type;
 
